@@ -10,7 +10,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
         <tr>
           <td [innerHtml]="data.InnerHtml"></td>
           <td *ngIf="data.Icon">
-            <span class="material-icons">{{data.Icon}}</span>
+            <!--<span class="material-icons">{{data.Icon}}</span>-->
           </td>
         </tr>
       </table>

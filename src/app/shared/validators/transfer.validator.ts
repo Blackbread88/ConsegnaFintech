@@ -16,7 +16,6 @@ export class TransferValidator {
           if (importoFld && cartaFld){
             const myCard = ris.find((card) => card._id === cartaFld.value);
             if (myCard?.amount){
-              console.log(myCard?.amount)
               if(myCard?.amount> +importoFld.value){
                 return null;
               }
@@ -44,13 +43,7 @@ export class TransferValidatorDirective implements AsyncValidator {
   @Input('cartaFldName') cartaFldName!:string;
   constructor(private myTransferValidator: TransferValidator) {}
 
-  /*validate(control: FormControl): Observable<ValidationErrors | null> | Promise<ValidationErrors | null>{
-    console.log(this.importoFldName,this.cartaFldName)
-    const validator = this.myTransferValidator.validate(this.importoFldName,this.cartaFldName);
-    return validator(control);
-  }*/
   validate(control: FormControl): Observable<ValidationErrors | null> | Promise<ValidationErrors | null>{
-    console.log("a", this.importoFldName,this.cartaFldName)
     //const validator = this.myTransferValidator.validate(this.importoFldName,this.cartaFldName);
     const validator = this.myTransferValidator.validate('importo','carta');
     return validator(control);

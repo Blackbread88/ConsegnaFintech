@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { CardsService } from 'src/app/api/cards.service';
 import { CardForm } from 'src/app/models/card-form.model';
 import { Card} from 'src/app/models/card.model';
@@ -31,7 +32,7 @@ export class CardsComponent implements OnInit {
   @ViewChild('cardForm') myCardForm!:CardFormComponent;
   creditCards:Card[]=[];
 
-  constructor(private mySnackBar: MatSnackBar, private cardService: CardsService) { }
+  constructor(private mySnackBar: MatSnackBar, private cardService: CardsService, private myRouter:Router) { }
 
   ngOnInit(): void {
     this.cardService.getCards().subscribe(result => {
@@ -73,6 +74,6 @@ export class CardsComponent implements OnInit {
   }
 
   vediMovimenti(idCarta:string){
-    console.log('Vedi Movimenti Carta '+idCarta)
+    this.myRouter.navigateByUrl('dashboard/movements/'+idCarta)
   }
 }

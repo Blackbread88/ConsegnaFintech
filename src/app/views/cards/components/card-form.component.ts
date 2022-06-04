@@ -12,7 +12,7 @@ import { CardForm } from 'src/app/models/card-form.model';
         <mat-select required ngModel #tipoCartaRef="ngModel" name="type">
           <mat-option *ngFor="let t of TipiCarte" [value]="t.toLowerCase()">{{t}}</mat-option>
         </mat-select>
-        <mat-error *ngIf="tipoCartaRef.errors?.['required'] && (tipoCartaRef.dirty || tipoCartaRef.touched)" class="invalidField">Tipo Carta Obbligatorio</mat-error>
+        <mat-error *ngIf="tipoCartaRef.errors?.['required'] && (tipoCartaRef.dirty || tipoCartaRef.touched)">Tipo Carta Obbligatorio</mat-error>
       </mat-form-field>
       <table class="fullWidth">
         <tr>
@@ -22,7 +22,7 @@ import { CardForm } from 'src/app/models/card-form.model';
               <input matInput placeholder="Nome" type=""
                 required ngModel #nomeRef="ngModel" name="name"
               >
-              <mat-error *ngIf="nomeRef.errors?.['required'] && (nomeRef.dirty || nomeRef.touched)" class="invalidField">Nome Obbligatorio</mat-error>
+              <mat-error *ngIf="nomeRef.errors?.['required'] && (nomeRef.dirty || nomeRef.touched)">Nome Obbligatorio</mat-error>
             </mat-form-field>
           </td>
           <td>
@@ -31,7 +31,7 @@ import { CardForm } from 'src/app/models/card-form.model';
               <input matInput placeholder="Cognome" type=""
                 required ngModel #cognomeRef="ngModel" name="surname"
               >
-              <mat-error *ngIf="cognomeRef.errors?.['required'] && (cognomeRef.dirty || cognomeRef.touched)" class="invalidField">Cognome Obbligatorio</mat-error>
+              <mat-error *ngIf="cognomeRef.errors?.['required'] && (cognomeRef.dirty || cognomeRef.touched)">Cognome Obbligatorio</mat-error>
             </mat-form-field>
           </td>
         </tr>
@@ -42,7 +42,7 @@ import { CardForm } from 'src/app/models/card-form.model';
           required minlength="16" maxlength="16"
           ngModel #numCartaRef="ngModel" name="number"
         >
-        <mat-error *ngIf="(numCartaRef.errors?.['required'] || numCartaRef.errors?.['minlength'] || numCartaRef.errors?.['maxlength']) && (numCartaRef.dirty || numCartaRef.touched)" class="invalidField">Il numero di carta deve essere di 16 caratteri</mat-error>
+        <mat-error *ngIf="(numCartaRef.errors?.['required'] || numCartaRef.errors?.['minlength'] || numCartaRef.errors?.['maxlength']) && (numCartaRef.dirty || numCartaRef.touched)">Il numero di carta deve essere di 16 caratteri</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Codice CVV</mat-label>
@@ -50,7 +50,7 @@ import { CardForm } from 'src/app/models/card-form.model';
           required minlength="3" maxlength="3"
           ngModel #codCVVRef="ngModel" name="csc"
         >
-        <mat-error *ngIf="(codCVVRef.errors?.['required']||codCVVRef.errors?.['minlength']||codCVVRef.errors?.['maxlength']) && (codCVVRef.dirty || codCVVRef.touched)" class="invalidField">Il codice di sicurezza deve essere di 3 caratteri</mat-error>
+        <mat-error *ngIf="(codCVVRef.errors?.['required']||codCVVRef.errors?.['minlength']||codCVVRef.errors?.['maxlength']) && (codCVVRef.dirty || codCVVRef.touched)">Il codice di sicurezza deve essere di 3 caratteri</mat-error>
       </mat-form-field>
       <button mat-raised-button color="primary" type="submit" [disabled]="f.invalid" class="fullWidth mb-2">Aggiungi Carta</button>
       <button mat-stroked-button color="warn" type="button" class="fullWidth mb-2" (click)="abortOperation.emit()">Annulla</button>

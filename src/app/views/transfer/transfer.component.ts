@@ -2,7 +2,7 @@ import { Component, OnInit, Inject, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, map, mergeMap, switchMap } from 'rxjs';
+import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { CardsService } from 'src/app/api/cards.service';
 import { ContactsService } from 'src/app/api/contacts.service';
 import { TransferService } from 'src/app/api/transfer.service';
@@ -77,7 +77,8 @@ export class TransferComponent implements OnInit {
     private mySnackBar: MatSnackBar,
     private mycardsService:CardsService,
     private myContactsService:ContactsService,
-    private myTransferService:TransferService) {}
+    private myTransferService:TransferService
+  ) {}
 
   ngOnInit(): void {
     this.mycardsService.getCards().subscribe(result => {

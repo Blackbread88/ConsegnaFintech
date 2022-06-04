@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { MatSelect } from '@angular/material/select';
+import { ActivatedRoute } from '@angular/router';
 import { CardsService } from 'src/app/api/cards.service';
 import { Card } from 'src/app/models/card.model';
 import { Movement } from 'src/app/models/movement.model';
@@ -9,8 +11,8 @@ import { Movement } from 'src/app/models/movement.model';
     <mat-card>
       <mat-form-field appearance="fill">
         <mat-label>Seleziona Carta di Credito</mat-label>
-        <mat-select>
-          <mat-option *ngFor="let card of creditCards" value="card._id" (click)="CaricaMovimenti(card,true)">{{card.number}}</mat-option>
+        <mat-select #cmbCartaRef name="cmbCarta">
+          <mat-option *ngFor="let card of creditCards" [value]="card._id" (click)="CaricaMovimenti(card,true)">{{card.number}}</mat-option>
         </mat-select>
       </mat-form-field>
       <h3 class="fw-bold" *ngIf="selectedCard">Saldo:{{selectedCard.amount}} </h3>
@@ -21,17 +23,25 @@ import { Movement } from 'src/app/models/movement.model';
   styles: []
 })
 export class MovementsComponent implements OnInit {
+  @ViewChild('cmbCartaRef') cmbCarta!: MatSelect
   totMovimenti:number=0;
   selectedCard:Card|null=null;
   mostraPulsante:boolean=true;
   creditCards:Card[]=[]
   movimenti:Movement[]=[]
 
-  constructor(private cardsService: CardsService) { }
+  constructor(private cardsService: CardsService,
+    private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.cardsService.getCards().subscribe(result => {
       this.creditCards = result;
+      const cardId = this.activatedRoute.snapshot.params['cardId'];
+      if (cardId){
+        this.cmbCarta.value=cardId
+        const c:Card|undefined=this.creditCards.find(card=>card._id===cardId)
+        if(c){this.CaricaMovimenti(c,true)}
+      }
     });
   }
 

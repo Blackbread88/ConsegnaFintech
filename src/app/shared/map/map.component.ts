@@ -19,7 +19,6 @@ export class MapComponent implements OnInit {
 
   ngOnInit(): void { }
   ngOnChanges(changes: SimpleChanges) {
-    //console.log(changes['coords'])
     if (changes['coords'] && changes['coords'].currentValue!==null) {
       const coords: L.LatLngExpression = this.coords as L.LatLngExpression;
       if (this.map){this.map.remove();}
@@ -33,13 +32,6 @@ export class MapComponent implements OnInit {
         .addTo(this.map)
         .openPopup();
     }
-
-    //if (changes.coords && !changes.coords.firstChange) {
-    //  const coords: L.LatLngExpression = this.location.coords as L.LatLngExpression;
-    //  this.map.setView(coords);
-    //  this.marker.setLatLng(coords);
-    //}
-
     if (changes['zoom'] && this.coords!==null) {
       this.map.setZoom(changes['zoom'].currentValue);
     }

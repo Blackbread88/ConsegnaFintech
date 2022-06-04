@@ -63,7 +63,6 @@ export class AppointmentsComponent implements OnInit {
   selectedSlotIndex:number=0
   disponibility:DayWithSlots[]|null=null
   locations:Location[]=[]
-  //sub=new Subscription
   calendarFilter =(date: Date | null): boolean => {
     const day = (date || new Date());
     if (!this.disponibility){return false}
@@ -92,7 +91,6 @@ export class AppointmentsComponent implements OnInit {
     if (!this.disponibility){return undefined}
     return this.disponibility.find(
       d => {
-        //const data:Date=new Date(d.day)
         const data:Date=this.stringToDate(d.day)
         return data.getTime() === dateToFind.getTime()
       }
@@ -113,19 +111,6 @@ export class AppointmentsComponent implements OnInit {
         YesNo:true
       },
     });
-
-    /*dialogRef.afterClosed().subscribe(result => {
-      if (result===true && this.selectedDay){
-        this.Appuntamento.day=this.selectedDay.day
-        this.Appuntamento.slot=this.selectedDay.slots[0]
-        console.log(this.Appuntamento)
-        this.mySnackBar.open('Appuntamento Confermato', '', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
-      }
-    });*/
 
     dialogRef.afterClosed().pipe(
       switchMap(esito=>{

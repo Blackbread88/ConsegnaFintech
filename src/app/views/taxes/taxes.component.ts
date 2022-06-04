@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { dateInputsHaveChanged } from '@angular/material/datepicker/datepicker-input-base';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { fromEvent, map, Observable, startWith, tap } from 'rxjs';
+import { combineLatest, debounceTime, fromEvent, map, mergeMap, Observable, startWith, tap } from 'rxjs';
 import { TaxesService } from 'src/app/api/taxes.service';
 import { Taxes } from 'src/app/models/taxes.model';
 import { amountValidator } from 'src/app/shared/validators/amount.validators';
@@ -16,16 +16,16 @@ import { INPSErrorStateMatcher } from './utility/utility';
     <form [formGroup]="frmTaxes">
       <h1>Contribuente</h1>
       <div formGroupName="contribuente">
-        Errori: {{frmTaxes.errors|json}} Valid: {{frmTaxes.valid}}
-        Pristine: {{frmTaxes.pristine}} Untouched: {{frmTaxes.untouched}}
+        <!--Errori: {{frmTaxes.errors|json}} Valid: {{frmTaxes.valid}}
+        Pristine: {{frmTaxes.pristine}} Untouched: {{frmTaxes.untouched}}-->
         <mat-form-field appearance="outline">
         <mat-label>Codice Fiscale</mat-label>
           <input matInput placeholder="Codice Fiscale" type="input" formControlName="codFiscale">
           <mat-error *ngIf="Contribuente.get('codFiscale')?.errors?.['required']">Codice Fiscale Obbligatorio</mat-error>
           <mat-error *ngIf="Contribuente.get('codFiscale')?.errors?.['InvalidCodFiscale'] && !Contribuente.get('codFiscale')?.errors?.['required']">Codice Fiscale Non Valido</mat-error>
         </mat-form-field>
-        Errori: {{Contribuente.get('codFiscale')?.errors|json}} Valid: {{Contribuente.get('codFiscale')?.valid}}
-        Pristine: {{Contribuente.get('codFiscale')?.pristine}} Untouched: {{Contribuente.get('codFiscale')?.untouched}}
+        <!--Errori: {{Contribuente.get('codFiscale')?.errors|json}} Valid: {{Contribuente.get('codFiscale')?.valid}}
+        Pristine: {{Contribuente.get('codFiscale')?.pristine}} Untouched: {{Contribuente.get('codFiscale')?.untouched}}-->
         <mat-form-field appearance="outline">
         <mat-label>Cognome</mat-label>
           <input matInput placeholder="Cognome" type="input" formControlName="cognome">
@@ -65,9 +65,9 @@ import { INPSErrorStateMatcher } from './utility/utility';
 
       <h1>Erario</h1>
       <ng-container formArrayName="erario">
-        <table>
+        <table class="tabDinamica">
           <tr *ngFor="let er of Erario.controls; let i = index;">
-            <div [formGroupName]="i">
+            <ng-container [formGroupName]="i">
               <td>
                 <mat-form-field appearance="outline">
                   <mat-label>Codice Tributo</mat-label>
@@ -101,49 +101,62 @@ import { INPSErrorStateMatcher } from './utility/utility';
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>
-            </div>
+            </ng-container>
+          </tr>
+          <tr *ngIf="Erario.length">
+            <td></td>
+            <td></td>
+            <td class="fw-bold">
+              Totale a Debito: {{ TotErarioDeb$ | async }}
+            </td>
+            <td class="fw-bold">
+              Totale a Credito: {{ TotErarioCred$ | async }}
+            </td>
+            <td></td>
           </tr>
         </table>
       </ng-container>
-      Totele: {{ TotErario$ | async }}
+      <p class="fw-bold">
+        Totale Erario: {{ TotErario$ | async }}
+      </p>
       <button mat-mini-fab color="primary" type="button" (click)="addErario()">
         <mat-icon>add</mat-icon>
       </button>
-
-      <h1>Inps</h1>
+      <br/>
+      <h1 class="mt-2">Inps</h1>
       <ng-container formArrayName="inps">
-        <table>
+        <table class="tabDinamica">
           <tr *ngFor="let inp of Inps.controls; let i = index;">
-            <div [formGroupName]="i">
+            <ng-container [formGroupName]="i">
               <td>
                 <mat-form-field appearance="outline">
                   <mat-label>Codice Sede</mat-label>
                   <input matInput placeholder="Codice Sede" type="input" formControlName="codiceSede">
-                  <mat-error>Inserire un indirizzo e-mail valido</mat-error>
+                  <mat-error>Codice Sede Obbligatorio</mat-error>
                 </mat-form-field>
               </td>
               <td>
                 <mat-form-field appearance="outline">
-                  <mat-label>Causale Controibuto</mat-label>
+                  <mat-label>Causale Contributo</mat-label>
                   <input matInput placeholder="Causale Contributo" type="input" formControlName="causaleContributo">
-                  <mat-error>Inserire un indirizzo e-mail valido</mat-error>
+                  <mat-error>Causale Contributo Obbligatoria</mat-error>
                 </mat-form-field>
               </td>
               <td>
                 <mat-form-field appearance="outline">
                   <mat-label>Codice Inps</mat-label>
                   <input matInput placeholder="Codice Inps" type="input" formControlName="codiceInps">
-                  <mat-error>Inserire un indirizzo e-mail valido</mat-error>
+                  <mat-error>Codice Inps Obbligatorio</mat-error>
                 </mat-form-field>
               </td>
               <td>
-              <mat-form-field appearance="outline">
-                <mat-label>Da</mat-label>
-                <input matInput [matDatepickerFilter]="calendarFilter" [matDatepicker]="pickerDaRef" formControlName="da" [errorStateMatcher]="inpsMatcher">
-                <mat-datepicker-toggle matSuffix [for]="pickerDaRef"></mat-datepicker-toggle>
-                <mat-datepicker #pickerDaRef></mat-datepicker>
-              </mat-form-field>
-              {{Inps.controls[i].errors|json}}
+                <mat-form-field appearance="outline">
+                  <mat-label>Da</mat-label>
+                  <input matInput [matDatepickerFilter]="calendarFilter" [matDatepicker]="pickerDaRef" formControlName="da" [errorStateMatcher]="inpsMatcher">
+                  <mat-datepicker-toggle matSuffix [for]="pickerDaRef"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerDaRef></mat-datepicker>
+                  <mat-error *ngIf="Inps.controls[i].get('da')?.errors?.['required']">Data Fine Obbligatoria</mat-error>
+                </mat-form-field>
               </td>
               <td>
               <mat-form-field appearance="outline">
@@ -151,20 +164,22 @@ import { INPSErrorStateMatcher } from './utility/utility';
                 <input matInput [matDatepickerFilter]="calendarFilter" [matDatepicker]="pickerARef" formControlName="a" [errorStateMatcher]="inpsMatcher">
                 <mat-datepicker-toggle matSuffix [for]="pickerARef"></mat-datepicker-toggle>
                 <mat-datepicker #pickerARef></mat-datepicker>
+                <mat-error *ngIf="Inps.controls[i].get('a')?.errors?.['required']">Data Fine Obbligatoria</mat-error>
+                <mat-error *ngIf="Inps.controls[i].errors?.['inps']">La data di Fine deve essere successiva alla data di Inizio</mat-error>
               </mat-form-field>
               </td>
               <td>
                 <mat-form-field appearance="outline">
                   <mat-label>Debito</mat-label>
                   <input matInput placeholder="Debito" type="input" formControlName="debito">
-                  <mat-error>Inserire un indirizzo e-mail valido</mat-error>
+                  <mat-error>Importo a Debito Obbligatorio</mat-error>
                 </mat-form-field>
               </td>
               <td>
                 <mat-form-field appearance="outline">
                   <mat-label>Credito</mat-label>
                   <input matInput placeholder="Credito" type="input" formControlName="credito">
-                  <mat-error>Inserire un indirizzo e-mail valido</mat-error>
+                  <mat-error>Importo a Credito Obbligatorio</mat-error>
                 </mat-form-field>
               </td>
               <td>
@@ -172,17 +187,34 @@ import { INPSErrorStateMatcher } from './utility/utility';
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>
-            </div>
+            </ng-container>
+          </tr>
+          <tr *ngIf="Inps.length">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="fw-bold">
+              Totale a Debito: {{ TotInpsDeb$ | async }}
+            </td>
+            <td class="fw-bold">
+              Totale a Credito: {{ TotInpsCred$ | async }}
+            </td>
+            <td></td>
           </tr>
         </table>
       </ng-container>
-
+      <p class="fw-bold">
+        Totale Inps: {{ TotInps$ | async }}
+      </p>
       <button mat-mini-fab color="primary" type="button" (click)="addInps()">
         <mat-icon>add</mat-icon>
       </button>
-
-      <button mat-raised-button color="primary" [disabled]="!frmTaxes.valid" (click)="ConfermaF24()" class="fullWidth mb-4">Invia</button>
-      <button mat-raised-button color="primary" (click)="ConfermaF24()" class="fullWidth mb-2">Invia</button>
+      <p class="fw-bold">
+        Totale: {{ Totale$ | async }}
+      </p>
+      <button mat-raised-button class="mt-3" color="primary" [disabled]="!frmTaxes.valid" (click)="ConfermaF24()" class="fullWidth mb-4">Invia</button>
     </form>
 </mat-card>
   `,
@@ -194,6 +226,9 @@ import { INPSErrorStateMatcher } from './utility/utility';
       display: flex;
       justify-content: center;
       width: 120px;
+    }
+    .tabDinamica{
+      width:100%;
     }
   `]
 })
@@ -228,7 +263,11 @@ export class TaxesComponent implements OnInit {
     erario: this.fb.array([]),
     inps: this.fb.array([])
   })
+  TotErarioCred$!: Observable<number>;
+  TotErarioDeb$!: Observable<number>;
   TotErario$!: Observable<number>;
+  TotInpsCred$!: Observable<number>;
+  TotInpsDeb$!: Observable<number>;
   TotInps$!: Observable<number>;
   Totale$!: Observable<number>;
 
@@ -238,20 +277,54 @@ export class TaxesComponent implements OnInit {
     return day.getTime()<=oggi.getTime();
   }
 
-  constructor(private fb:FormBuilder, private myTaxesService:TaxesService, private mySnackBar: MatSnackBar) { }
-  ngOnInit() {
-    this.TotErario$ = this.frmTaxes.valueChanges.pipe(
-      tap(val=>{
-        console.log(val as unknown as Taxes)
-      }),
+  constructor(private fb:FormBuilder, private myTaxesService:TaxesService, private mySnackBar: MatSnackBar) {
+    this.TotErarioCred$ = this.frmTaxes.valueChanges.pipe(
       map((val:Taxes)=>{
-
+        //return val.erario.reduce((Tot,Er)=>Tot + parseFloat(Er.credito.toString()),0)
         return val.erario.reduce((Tot,Er)=>Tot + +Er.credito,0)
       },
       startWith(0)
       )
     )
-    this.TotInps$ = this.frmTaxes.valueChanges
+    this.TotErarioDeb$ = this.frmTaxes.valueChanges.pipe(
+      map((val:Taxes)=>{
+        return val.erario.reduce((Tot,Er)=>Tot + +Er.debito,0)
+      },
+      startWith(0)
+      )
+    )
+    this.TotErario$=combineLatest([this.TotErarioCred$,this.TotErarioDeb$]).pipe(
+      debounceTime(100),
+      map(([c, d]) => c-d)
+    )
+
+    this.TotInpsCred$ = this.frmTaxes.valueChanges.pipe(
+      map((val:Taxes)=>{
+        return val.inps.reduce((Tot,inps)=>Tot + +inps.credito,0)
+      },
+      startWith(0)
+      )
+    )
+    this.TotInpsDeb$ = this.frmTaxes.valueChanges.pipe(
+      map((val:Taxes)=>{
+        return val.inps.reduce((Tot,inps)=>Tot + +inps.debito,0)
+      },
+      startWith(0)
+      )
+    )
+    this.TotInps$=combineLatest([this.TotInpsCred$,this.TotInpsDeb$]).pipe(
+      debounceTime(100),
+      map(([c, d]) => c-d)
+    )
+
+    this.Totale$=combineLatest([this.TotErario$,this.TotInps$]).pipe(
+      debounceTime(100),
+      map(([e, i]) => e+i)
+    )
+   }
+  ngOnInit() {
+
+
   }
 
   get Contribuente(){
@@ -300,13 +373,10 @@ export class TaxesComponent implements OnInit {
   ConfermaF24(){
     this.frmTaxes.reset(this.initialValue);
     this.formDirective.resetForm();
-    console.log('aaaa')
     //this.frmTaxes.get('contribuente')?.get('codFiscale')?.markAsPristine();
     //this.frmTaxes.get('contribuente')?.get('codFiscale')?.markAsUntouched();
-    //this.frmTaxes.updateValueAndValidity();
 
-    //this.frmTaxes.ma
-    /*this.myTaxesService.addF24(this.frmTaxes.value).subscribe(result => {
+    this.myTaxesService.addF24(this.frmTaxes.value).subscribe(result => {
       if (result===true){
         this.mySnackBar.open('Modello F24 Inviato Correttamente', 'chiudi', {
           duration: 3000,
@@ -325,7 +395,7 @@ export class TaxesComponent implements OnInit {
           verticalPosition: 'bottom',
         });
       }
-    });*/
+    });
   }
 }
 
@@ -335,7 +405,6 @@ export const inpsValidator: ValidatorFn = (control: AbstractControl): Validation
       const data1 = new Date(control.get('da')?.value);
       const data2 = new Date(control.get('a')?.value);
       if (data1.getTime()>data2.getTime()){
-        //return {InvalidDateRange: 'Range di date non valido'}
         return {inps: 'La data di inizio deve essere precedente alla data di fine'}
 
       }

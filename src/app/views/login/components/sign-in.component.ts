@@ -14,8 +14,8 @@ import { AuthService } from 'src/app/core/services/auth.service';
             required pattern="[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+"
             ngModel #emailRef="ngModel" name="email"
           >
-          <mat-hint *ngIf="emailRef.errors?.['required'] && (emailRef.dirty || emailRef.touched)" class="invalidField">Inserire indirizzo e-mail</mat-hint>
-          <mat-hint *ngIf="emailRef.errors?.['pattern'] && (emailRef.dirty || emailRef.touched)" class="invalidField">Inserire un indirizzo e-mail valido</mat-hint>
+          <mat-error *ngIf="emailRef.errors?.['required'] && (emailRef.dirty || emailRef.touched)">Inserire indirizzo e-mail</mat-error>
+          <mat-error *ngIf="emailRef.errors?.['pattern'] && (emailRef.dirty || emailRef.touched)">Inserire un indirizzo e-mail valido</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -27,7 +27,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
           >
           <mat-icon matSuffix *ngIf="pswVisibile" (click)="MostraNascondiPsw()">visibility</mat-icon>
           <mat-icon matSuffix *ngIf="!pswVisibile" (click)="MostraNascondiPsw()">visibility_off</mat-icon>
-          <mat-hint *ngIf="passwordRef.errors?.['required'] && (passwordRef.dirty || passwordRef.touched)" class="invalidField">Inserire la password</mat-hint>
+          <mat-error *ngIf="passwordRef.errors?.['required'] && (passwordRef.dirty || passwordRef.touched)">Inserire la password</mat-error>
         </mat-form-field>
         <button mat-raised-button color="primary" tipe=submit [disabled]="f.invalid" class="button100 mb-2">Accedi</button>
         <mat-error *ngIf="ErroreLogin">Nome Utente o Password Errati</mat-error>
